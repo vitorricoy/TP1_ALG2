@@ -1,5 +1,7 @@
 import random
 import xNN
+import kNN_lib
+import time
 
 pontos = []
 
@@ -30,8 +32,25 @@ for ponto in pontosTreino:
     if ponto[1] == 'A':
         pontosATreino.append(ponto[0])
 
-classificador = xNN.xNN(3, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
+start = time.time()
 
-print(classificador.obterAcuracia())
-print(classificador.obterRevocacao())
-print(classificador.obterPrecisao())
+classificador1 = xNN.xNN(3, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
+
+end = time.time()
+print('Tempo =', 
+end - start)
+print(classificador1.obterAcuracia())
+print(classificador1.obterRevocacao())
+print(classificador1.obterPrecisao())
+
+print()
+
+start = time.time()
+
+classificador2 = kNN_lib.xNN(3, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
+
+end = time.time()
+print('Tempo =',end - start)
+print(classificador2.obterAcuracia())
+print(classificador2.obterRevocacao())
+print(classificador2.obterPrecisao())
