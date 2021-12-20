@@ -1,5 +1,6 @@
 import math
 import arvore_kd
+import bisect
 
 class xNN:
     def __init__(self, k, pontosTreinamento, pontosClassificacao, pontosAClassificacao, pontosATreino, dimensaoPontos):
@@ -16,9 +17,12 @@ class xNN:
     def classificaPontos(self, pontosClassificacao):
         classificacoes = []
         for ponto in pontosClassificacao:
-            candidatos = []
-            self.classificaPonto(self.arvoreKD.getRaiz(), ponto, candidatos, set())
-            rotulos = ['A' if ponto[1] in self.pontosATreino else 'B' for ponto in candidatos]
+            self.candidatos = []
+            self.visitados = set()
+            self.ponto = ponto
+            self.maiorDistancia = math.inf
+            self.classificaPonto(self.arvoreKD.getRaiz())
+            rotulos = ['A' if ponto[1] in self.pontosATreino else 'B' for ponto in self.candidatos]
             numeroAs = 0
             numeroBs = 0
             for rotulo in rotulos:
@@ -42,35 +46,69 @@ class xNN:
         
         return math.sqrt(soma)
 
-    def classificaPonto(self, noAtual, ponto, candidatos, visitados, menorDistancia = math.inf):
+    def classificaPonto(self, noAtual):
         if noAtual is None:
             return
         valorNo = self.arvoreKD.getValor(noAtual)
         profundidade = self.arvoreKD.getProfundidade(noAtual)
         dimensao = self.arvoreKD.getDimensao(noAtual)
-        if (profundidade, valorNo) in visitados:
+        if (profundidade, valorNo) in self.visitados:
             return
         if self.arvoreKD.isFolha(noAtual):
-            distancia = self.distancia(ponto, valorNo)
+            distancia = self.distancia(self.ponto, valorNo)
 
-            if distancia < menorDistancia:
-                candidatos.append([distancia, valorNo])
-                candidatos.sort(key=lambda candidato: candidato[0])
-                menorDistancia = candidatos[-1][0]
+            if distancia < self.maiorDistancia:
+                bisect.insort(self.candidatos, [distancia, valorNo])
+                self.maiorDistancia = self.candidatos[-1][0]
 
-            if len(candidatos) > self.k:
-                candidatos.pop()
-                menorDistancia = candidatos[-1][0]
+            if len(self.candidatos) > self.k:
+                self.candidatos.pop()
+                self.maiorDistancia = self.candidatos[-1][0]
         else:
-            if ponto[dimensao] < valorNo:
-                self.classificaPonto(self.arvoreKD.getNoEsquerda(noAtual), ponto, candidatos, visitados, menorDistancia)
-                if valorNo - ponto[dimensao] <= menorDistancia:
-                    self.classificaPonto(self.arvoreKD.getNoDireita(noAtual), ponto, candidatos, visitados, menorDistancia)
+            if self.ponto[dimensao] < valorNo:
+                self.classificaPonto(self.arvoreKD.getNoEsquerda(noAtual))
+                if valorNo-self.ponto[dimensao] <= self.maiorDistancia:
+                    self.classificaPonto(self.arvoreKD.getNoDireita(noAtual))
             else:
-                self.classificaPonto(self.arvoreKD.getNoDireita(noAtual), ponto, candidatos, visitados, menorDistancia)
-                if valorNo - ponto[dimensao] <= menorDistancia:
-                    self.classificaPonto(self.arvoreKD.getNoEsquerda(noAtual), ponto, candidatos, visitados, menorDistancia)
-        visitados.add((profundidade, valorNo))
+                self.classificaPonto(self.arvoreKD.getNoDireita(noAtual))
+                if self.ponto[dimensao]-valorNo <= self.maiorDistancia:
+                    self.classificaPonto(self.arvoreKD.getNoEsquerda(noAtual))
+        self.visitados.add((profundidade, valorNo))
+
+    def classificaPontoIt(self, noAtual, ponto, candidatos, visitados):
+        maiorDistancia = math.inf
+        pilha = []
+        pilha.append(noAtual)
+        while len(pilha) > 0:
+            noAtual, ponto, candidatos, visitados, maiorDistancia = pilha.pop()
+            if noAtual is None:
+                return
+            valorNo = self.arvoreKD.getValor(noAtual)
+            profundidade = self.arvoreKD.getProfundidade(noAtual)
+            dimensao = self.arvoreKD.getDimensao(noAtual)
+            if (profundidade, valorNo) in visitados:
+                return
+            if self.arvoreKD.isFolha(noAtual):
+                distancia = self.distancia(ponto, valorNo)
+
+                if distancia < maiorDistancia:
+                    bisect.insort(candidatos, [distancia, valorNo])
+                    maiorDistancia = candidatos[-1]
+
+                if len(candidatos) > self.k:
+                    candidatos.pop()
+                    maiorDistancia = candidatos[-1]
+            else:
+                if ponto[dimensao] < valorNo:
+                    self.classificaPonto(self.arvoreKD.getNoEsquerda(noAtual), ponto, candidatos, visitados, maiorDistancia)
+                    if valorNo-ponto[dimensao] <= maiorDistancia:
+                        self.classificaPonto(self.arvoreKD.getNoDireita(noAtual), ponto, candidatos, visitados, maiorDistancia)
+                else:
+                    self.classificaPonto(self.arvoreKD.getNoDireita(noAtual), ponto, candidatos, visitados, maiorDistancia)
+                    if ponto[dimensao]-valorNo <= maiorDistancia:
+                        self.classificaPonto(self.arvoreKD.getNoEsquerda(noAtual), ponto, candidatos, visitados, maiorDistancia)
+            visitados.add((profundidade, valorNo))
+
 
     def obterInformacoesParaMetricaClassificacao(self, pontosClassificacao, classificacoes):
         verdadeiroA = 0
