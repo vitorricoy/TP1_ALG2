@@ -60,23 +60,8 @@ class ArvoreKD:
 
     def getRaiz(self):
         return self.raiz
-
-    def getValor(self, no):
-        return no.getValor()
-
-    def getNoEsquerda(self, no):
-        return no.getNoEsquerda()
-
-    def getNoDireita(self, no):
-        return no.getNoDireita()
-
-    def isFolha(self, no):
-        return no.isFolha()
-
+        
     def getDimensao(self, no):
         return no.getProfundidade()%self.k
-    
-    def getProfundidade(self, no):
-        return no.getProfundidade()
 
 

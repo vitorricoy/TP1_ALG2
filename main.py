@@ -1,56 +1,61 @@
 import random
 import xNN
-import kNN_lib
+import os
 import time
 
-pontos = []
+for filename in os.listdir('testes'):
+    pontos = []
+    mapeamentoAtributos = []
+    valor_k = -1
+    with open('testes/'+filename) as file:
+        for line in file:
+            line = line.strip()
+            if valor_k == -1:
+                valor_k = int(line)
+                continue
+            if line == 'EOF':
+                break
+            else:
+                partes = line.split(',')
+                if len(mapeamentoAtributos) == 0:
+                    for i in range(len(partes)):
+                        mapeamentoAtributos.append(dict())
+                partesConvertidas = []
+                for i in range(len(partes)):
+                    if i != len(partes)-1 and partes[i].isnumeric():
+                        partesConvertidas.append(float(partes[i]))
+                    else:
+                        if partes[i] not in mapeamentoAtributos[i]:
+                            mapeamentoAtributos[i][partes[i]] = len(mapeamentoAtributos[i])
+                        partesConvertidas.append(mapeamentoAtributos[i][partes[i]])
+                
+                pontos.append((tuple(partesConvertidas[:-1]), 'A' if partesConvertidas[-1] == 0 else 'B'))
 
-with open('teste.txt') as file:
-    for line in file:
-        line = line.strip()
-        if line == 'EOF':
-            break
-        else:
-            partes = line.split(',')
-            partes = [float(parte) for parte in partes]
-            pontos.append((tuple(partes[:-1]), 'A' if partes[-1] == 1 else 'B'))
+    random.shuffle(pontos)
 
-random.shuffle(pontos)
+    numeroPontosClassificacao = int(len(pontos)*0.3)
 
-numeroPontosClassificacao = int(len(pontos)*0.3)
+    pontosClassificacao = pontos[:numeroPontosClassificacao]
+    pontosTreino = pontos[numeroPontosClassificacao:]
 
-pontosClassificacao = pontos[:numeroPontosClassificacao]
-pontosTreino = pontos[numeroPontosClassificacao:]
+    pontosAClassificacao = set()
+    for ponto in pontosClassificacao:
+        if ponto[1] == 'A':
+            pontosAClassificacao.add(ponto[0])
 
-pontosAClassificacao = []
-for ponto in pontosClassificacao:
-    if ponto[1] == 'A':
-        pontosAClassificacao.append(ponto[0])
+    pontosATreino = set()
+    for ponto in pontosTreino:
+        if ponto[1] == 'A':
+            pontosATreino.add(ponto[0])
 
-pontosATreino = []
-for ponto in pontosTreino:
-    if ponto[1] == 'A':
-        pontosATreino.append(ponto[0])
+    start = time.time()
 
-start = time.time()
+    classificador1 = xNN.xNN(valor_k, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
 
-classificador1 = xNN.xNN(3, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
-
-end = time.time()
-print('Tempo =', 
-end - start)
-print(classificador1.obterAcuracia())
-print(classificador1.obterRevocacao())
-print(classificador1.obterPrecisao())
-
-print()
-
-start = time.time()
-
-classificador2 = kNN_lib.xNN(3, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
-
-end = time.time()
-print('Tempo =',end - start)
-print(classificador2.obterAcuracia())
-print(classificador2.obterRevocacao())
-print(classificador2.obterPrecisao())
+    end = time.time()
+    print('Resultados para o arquivo ', filename, ':', sep = '')
+    print('Tempo =', end - start)
+    #print(classificador1.obterClassificacoes())
+    print(classificador1.obterAcuracia())
+    print(classificador1.obterRevocacao())
+    print(classificador1.obterPrecisao())
