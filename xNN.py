@@ -36,7 +36,7 @@ class xNN:
                 if numeroBs > numeroAs:
                     classificacoes.append('B')
                 else:
-                    classificacoes.append(rotulos[0])
+                    classificacoes.append(rotulos[-1])
         return classificacoes
     
     def distancia(self, ponto1, ponto2):
@@ -52,9 +52,9 @@ class xNN:
 
     def compararPlanoEsfera(self, valorNo, ponto, dist, dir):
         if dir == 'Esq':
-            return ponto - dist < valorNo
+            return ponto - dist <= valorNo
         else:
-            return ponto + dist > valorNo
+            return ponto + dist >= valorNo
 
     def classificaPonto(self, noAtual, ponto):
         valorNo = noAtual.getValor()

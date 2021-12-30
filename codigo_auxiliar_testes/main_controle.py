@@ -1,13 +1,13 @@
+import xNNLib
 import random
-import xNN
 import os
 import time
 
-for filename in os.listdir('testes'):
+for filename in os.listdir('../testes'):
     pontos = []
     mapeamentoAtributos = []
     valor_k = -1
-    with open('testes/'+filename) as file:
+    with open('../testes/'+filename) as file:
         for line in file:
             line = line.strip()
             if valor_k == -1:
@@ -56,7 +56,7 @@ for filename in os.listdir('testes'):
 
         start = time.time()
 
-        classificador = xNN.xNN(valor_k, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
+        classificador = xNNLib.xNN(valor_k, [ponto[0] for ponto in pontosTreino], [ponto[0] for ponto in pontosClassificacao], pontosAClassificacao, pontosATreino, len(pontosTreino[0]))
 
         end = time.time()
         tempoTotal += end-start
