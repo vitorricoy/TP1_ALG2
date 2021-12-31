@@ -3,7 +3,9 @@ import xNN
 import os
 import time
 
+# Le todos os arquivos de teste em um diretorio
 for filename in os.listdir('testes'):
+    # Le o arquivo de testes e preenche a lista de pontos
     pontos = []
     mapeamentoAtributos = []
     valor_k = -1
@@ -35,7 +37,7 @@ for filename in os.listdir('testes'):
     acuraciaTotal = 0
     revocacaoTotal = 0
     precisaoTotal = 0
-
+    # Executa o algoritmo de KNN 10 vezes e guarda os valores encontrados
     for i in range(10):
         random.shuffle(pontos)
 
@@ -64,6 +66,7 @@ for filename in os.listdir('testes'):
         revocacaoTotal += classificador.obterRevocacao()
         precisaoTotal += classificador.obterPrecisao()
     
+    # Imprime a media dos resultados encontrados pelas 10 execucoes
     print('Resultados para o arquivo ', filename, ':', sep = '')
     print('Tempo =', tempoTotal/10.0)
     print('Acurácia:', acuraciaTotal/10.0)
