@@ -2,6 +2,7 @@ import math
 import numpy as np
 from sklearn.neighbors import KDTree
 
+# Implementacao da classe xNN usando o classificador da KDTree da biblioteca sklearn
 class xNN:
     def __init__(self, k, pontosTreinamento, pontosClassificacao, pontosAClassificacao, pontosATreino, dimensaoPontos):
         self.k = k
