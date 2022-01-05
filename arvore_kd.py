@@ -51,6 +51,9 @@ class ArvoreKD:
 
     # Funcao que constroi a arvore
     def construirArvore(self, pontos, profundidade):
+        # Se o subconjunto e vazio
+        if len(pontos) == 0:
+            return None
         # Se o grupo de pontos possui apenas um ponto
         if len(pontos) == 1:
             # Cria um no folha contendo o ponto
@@ -61,6 +64,9 @@ class ArvoreKD:
             pontos.sort(key=lambda pt : pt[profundidade%self.k])
             posMediana = len(pontos)//2
             mediana = pontos[posMediana][profundidade%self.k]
+            # Valores iguais a mediana ficam a esquerda
+            while posMediana < len(pontos) and pontos[posMediana] == mediana:
+                posMediana+=1
             pontos1 = pontos[:posMediana]
             pontos2 = pontos[posMediana:]
             # Executa a funcao de construcao para os dois grupos separados pela mediana
